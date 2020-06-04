@@ -35,7 +35,7 @@ require('dotenv').config();
         var timeout = 30000;
         start = new Date();
         console.log(`start ${start}`);
-        var errorMessage = '';
+        var errorMessages = [];
         var attempts = 0;
         while (true) {
             const index = Math.floor(Math.random() * urls.length);
@@ -50,7 +50,7 @@ require('dotenv').config();
                         start: start,
                         end: new Date(),
                         attempts: attempts,
-                        message: errorMessage
+                        messages: errorMessages
                     });
                     haveError = false;
                 }
@@ -58,8 +58,9 @@ require('dotenv').config();
                     throw { message: `${response.status} ${response.statusText}` };
                 }
             } catch (err) {
-                console.error(`${new Date()} ${err.message}`);
-                errorMessage = err.message;
+                const errm = `${new Date()} ${err.message}`;
+                console.error(errm);
+                errorMessages.push(errm);
                 haveError = true;
             }
         }
