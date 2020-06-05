@@ -60,7 +60,7 @@ require('dotenv').config();
             } catch (err) {
                 const errm = `${new Date()} ${err.message}`;
                 console.error(errm);
-                errorMessages.push(errm);
+                errorMessages.push({time: new Date(), message: err.message});
                 haveError = true;
             }
         }
