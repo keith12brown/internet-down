@@ -40,6 +40,7 @@ require('dotenv').config();
             const index = Math.floor(Math.random() * urls.length);
             const url = urls[index];
             try {
+                attempts++;
                 const response = await fetch(url, { timeout: timeoutSeconds });
                 if (response.ok) {
                     if (haveError) {
@@ -60,7 +61,6 @@ require('dotenv').config();
                 console.error(errm);
                 errorMessages.push({ time: new Date(), message: err.message });
                 haveError = true;
-                attempts++;
             }
         }
 
