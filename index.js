@@ -26,33 +26,31 @@ require('dotenv').config();
 
     const col = await db.collection(process.env.MONGO_COLLECTION);
 
-    var start = {};
-
     const urls = process.env.URLS.split(',');
+
+    const timeoutSeconds = (process.env.TIMEOUT_SECONDS || 60) * 1000;
 
     while (true) {
         var haveError = false;
-        var timeout = 30000;
-        start = new Date();
+        var start = new Date();
         console.log(`start ${start}`);
         var errorMessages = [];
         var attempts = 0;
         while (true) {
             const index = Math.floor(Math.random() * urls.length);
             const url = urls[index];
-            attempts++;
             try {
-                const response = await fetch(url, { timeout: 30 * 1000 });
-                if (response.ok && !haveError) {
+                const response = await fetch(url, { timeout: timeoutSeconds });
+                if (response.ok) {
+                    if (haveError) {
+                        db.collection(process.env.MONGO_COLLECTION).insertOne({
+                            start: start,
+                            end: new Date(),
+                            attempts: attempts,
+                            messages: errorMessages
+                        });
+                    }
                     break;
-                } else if (response.ok && haveError) {
-                    await db.collection(process.env.MONGO_COLLECTION).insertOne({
-                        start: start,
-                        end: new Date(),
-                        attempts: attempts,
-                        messages: errorMessages
-                    });
-                    haveError = false;
                 }
                 else {
                     throw { message: `${response.status} ${response.statusText}` };
@@ -62,6 +60,7 @@ require('dotenv').config();
                 console.error(errm);
                 errorMessages.push({ time: new Date(), message: err.message });
                 haveError = true;
+                attempts++;
             }
         }
 
