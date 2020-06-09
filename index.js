@@ -3,10 +3,37 @@
 const fetch = require('node-fetch');
 
 const MongoClient = require('mongodb').MongoClient;
+const ObjectID = require('mongodb').ObjectID;
 
 const sleep = require('util').promisify(setTimeout);
 
 require('dotenv').config();
+
+function insertUpdateError(db) {
+    this.id = {};
+    this.attempts = 0;
+    this.db = db;
+
+    this.save = async function (errorMessage) {
+        const date = new Date();
+        if (this.attempts === 0) {
+            this.id = new ObjectID();
+        }
+
+        await this.db.collection(process.env.MONGO_COLLECTION).updateOne(
+            { _id: this.id },
+            {
+                $set: {
+                    _id: this.id,
+                    end: date,
+                    attempts: ++this.attempts
+                },
+                $push: { messages: { time: date, message: errorMessage } },
+                $setOnInsert: { start: date },
+            },
+            { upsert: true });
+    }
+}
 
 (async () => {
     var db = {};
@@ -34,23 +61,13 @@ require('dotenv').config();
         var haveError = false;
         var start = new Date();
         console.log(`start ${start}`);
-        var errorMessages = [];
-        var attempts = 0;
+        var saveError = new insertUpdateError(db);
         while (true) {
             const index = Math.floor(Math.random() * urls.length);
             const url = urls[index];
             try {
-                attempts++;
                 const response = await fetch(url, { timeout: timeoutSeconds });
                 if (response.ok) {
-                    if (haveError) {
-                        db.collection(process.env.MONGO_COLLECTION).insertOne({
-                            start: start,
-                            end: new Date(),
-                            attempts: attempts,
-                            messages: errorMessages
-                        });
-                    }
                     break;
                 }
                 else {
@@ -59,8 +76,7 @@ require('dotenv').config();
             } catch (err) {
                 const errm = `${new Date()} ${err.message}`;
                 console.error(errm);
-                errorMessages.push({ time: new Date(), message: err.message });
-                haveError = true;
+                saveError.save(err.message);
             }
         }
 
