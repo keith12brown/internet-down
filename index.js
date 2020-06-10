@@ -14,13 +14,13 @@ function insertUpdateError(db) {
     this.attempts = 0;
     this.db = db;
 
-    this.save = async function (errorMessage) {
+    this.save = function (errorMessage) {
         const date = new Date();
         if (this.attempts === 0) {
             this.id = new ObjectID();
         }
 
-        await this.db.collection(process.env.MONGO_COLLECTION).updateOne(
+        this.db.collection(process.env.MONGO_COLLECTION).updateOne(
             { _id: this.id },
             {
                 $set: {
@@ -31,7 +31,12 @@ function insertUpdateError(db) {
                 $push: { messages: { time: date, message: errorMessage } },
                 $setOnInsert: { start: date },
             },
-            { upsert: true });
+            { upsert: true },
+            (err, result) => {
+                if (err) {
+                    console.log(`error ${err}`);
+                }
+            });
     }
 }
 
@@ -58,7 +63,6 @@ function insertUpdateError(db) {
     const timeoutSeconds = (process.env.TIMEOUT_SECONDS || 60) * 1000;
 
     while (true) {
-        var haveError = false;
         var start = new Date();
         console.log(`start ${start}`);
         var saveError = new insertUpdateError(db);
