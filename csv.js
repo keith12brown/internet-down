@@ -3,7 +3,7 @@ const MongoClient = require('mongodb').MongoClient;
 
 const fs = require('fs');
 
-const CSV_FILE ='./outages.csv';
+const CSV_FILE = './outages.csv';
 
 require('dotenv').config();
 
@@ -11,7 +11,7 @@ if (fs.existsSync(CSV_FILE)) {
     fs.truncateSync(CSV_FILE);
 }
 
-( async () => {
+(async () => {
 
     var db = {};
     var client = {}
@@ -33,7 +33,7 @@ if (fs.existsSync(CSV_FILE)) {
 
     fs.appendFileSync(CSV_FILE, 'id,start,end,attempts,duration\n');
 
-    var dataArray = await col.aggregate([
+    col.aggregate([
         {
             $project: {
                 "_id": 1,
@@ -43,12 +43,26 @@ if (fs.existsSync(CSV_FILE)) {
                 duration: { $divide: [{ $subtract: ["$end", "$start"] }, 1000] }
             }
         }
-    ]).toArray();
+    ], (err, cursor) => {
+        if (err) {
+            throw err;
+        }
 
-    for(data of dataArray) {
-        fs.appendFileSync(CSV_FILE, `${data._id},${data.start},${data.end},${data.attempts},${data.duration}\n`);
-    }
-    client.close();
-    console.log('done');
-    process.exit(0);
+        cursor.on('close', () => {
+            client.close();
+            console.log('done');
+            process.exit(0);
+        })
+
+        cursor.forEach(data => {
+            if (data) {
+                fs.appendFile(CSV_FILE, `${data._id},${data.start},${data.end},${data.attempts},${data.duration}\n`, (err) => {
+                    if (err) {
+                        console.log(err);
+                    }
+                });
+            }
+        });
+    });
+
 })();
