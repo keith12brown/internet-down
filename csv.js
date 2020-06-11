@@ -14,8 +14,9 @@ if (fs.existsSync(CSV_FILE)) {
 ( async () => {
 
     var db = {};
+    var client = {}
     try {
-        const client = await MongoClient.connect(process.env.MONGO_DB_URL,
+        client = await MongoClient.connect(process.env.MONGO_DB_URL,
             {
                 useUnifiedTopology: true
             });
@@ -47,6 +48,7 @@ if (fs.existsSync(CSV_FILE)) {
     for(data of dataArray) {
         fs.appendFileSync(CSV_FILE, `${data._id},${data.start},${data.end},${data.attempts},${data.duration}\n`);
     }
+    client.close();
     console.log('done');
     process.exit(0);
 })();
