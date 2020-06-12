@@ -5,8 +5,9 @@
   "main": "index.js",
   "dependencies": {
     "dotenv": "^8.2.0",
+    "mongodb": "^3.5.7",
     "node-fetch": "^2.6.0",
-    "mongodb": "^3.5.7"
+    "node-notifier": "^7.0.1"
   },
   "devDependencies": {
     "@types/node": "^14.0.13"

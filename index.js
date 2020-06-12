@@ -9,6 +9,24 @@ const sleep = require('util').promisify(setTimeout);
 
 require('dotenv').config();
 
+const notifier = require('node-notifier');
+
+const sendNotification = (title, message) => {
+    console.log(`${title} ${message}`);
+    notifier.notify({
+        title: title,
+        message: message,
+        wait: true
+    }, (err, response) => {
+        if (err) {
+            console.log(`notification error ${err}`)
+        } 
+        if (response) {
+            console.log(`notification response ${response}`);
+        }
+    });
+}
+
 function insertUpdateError(db) {
     this.id = {};
     this.attempts = 0;
@@ -18,6 +36,7 @@ function insertUpdateError(db) {
         const date = new Date();
         if (this.attempts === 0) {
             this.id = new ObjectID();
+            sendNotification('No internet access', date.toLocaleDateString());
         }
 
         this.db.collection(process.env.MONGO_COLLECTION).updateOne(
@@ -67,9 +86,10 @@ function insertUpdateError(db) {
         console.log(`start ${start}`);
         var saveError = new insertUpdateError(db);
         var lastIndex = -1;
+        var index = 0
         while (true) {
             do {
-                const index = Math.floor(Math.random() * urls.length);
+                index = Math.floor(Math.random() * urls.length);
             } while(lastIndex === index);
             
             lastIndex = index;
