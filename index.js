@@ -66,8 +66,13 @@ function insertUpdateError(db) {
         var start = new Date();
         console.log(`start ${start}`);
         var saveError = new insertUpdateError(db);
+        var lastIndex = -1;
         while (true) {
-            const index = Math.floor(Math.random() * urls.length);
+            do {
+                const index = Math.floor(Math.random() * urls.length);
+            } while(lastIndex === index);
+            
+            lastIndex = index;
             const url = urls[index];
             try {
                 const response = await fetch(url, { timeout: timeoutSeconds });
