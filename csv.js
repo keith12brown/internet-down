@@ -46,7 +46,6 @@ MongoClient.connect(process.env.MONGO_DB_URL,
                 cursor.on('close', () => {
                     client.close();
                     console.log('done');
-                    process.exit(0);
                 });
 
                 cursor.forEach(data => {
