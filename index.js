@@ -100,7 +100,7 @@ function insertUpdateError(db) {
                     break;
                 }
                 else {
-                    throw { message: `${response.status} ${response.statusText}` };
+                    // Ignore and continue. The problem will not be recorded whether it is in an outage or not.
                 }
             } catch (err) {
                 const errm = `${new Date()} ${err.message}`;
