@@ -13,18 +13,19 @@ const notifier = require('node-notifier');
 
 const sendNotification = (title, message) => {
     console.log(`${title} ${message}`);
-    notifier.notify({
-        title: title,
-        message: message,
-        wait: true
-    }, (err, response) => {
-        if (err) {
-            console.log(`notification error ${err}`)
-        } 
-        if (response) {
-            console.log(`notification response ${response}`);
-        }
-    });
+    try {
+        notifier.notify({
+            title: title,
+            message: message,
+            wait: true
+        }, (err, response) => {
+            if (err) {
+                console.log(`notification error ${err}`);
+            }
+        });
+    } catch (err) {
+        console.log(`error notifying ${err}`);
+    }
 }
 
 function insertUpdateError(db) {
@@ -90,8 +91,8 @@ function insertUpdateError(db) {
         while (true) {
             do {
                 index = Math.floor(Math.random() * urls.length);
-            } while(lastIndex === index);
-            
+            } while (lastIndex === index);
+
             lastIndex = index;
             const url = urls[index];
             try {
