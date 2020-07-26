@@ -107,6 +107,7 @@ function insertUpdateError(db) {
                 const errm = `${new Date()} ${err.message}`;
                 console.error(errm);
                 saveError.save(err.message);
+                await sleep(process.env.SLEEP_SECONDS * 1000);
             }
         }
 
