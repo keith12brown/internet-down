@@ -6,7 +6,7 @@
   "dependencies": {
     "dotenv": "^8.2.0",
     "mongodb": "^3.5.7",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "node-notifier": "^7.0.1"
   },
   "devDependencies": {
